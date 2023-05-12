@@ -1,0 +1,26 @@
+version: "3.9"
+
+services:
+  web:
+    container_name: FLOWERS
+    build: .
+    restart: always
+    env_file: .env
+    ports:
+      - ${UVICORN__PORT}:${UVICORN__PORT}
+    environment:
+      - POSTGRES__URL=postgresql+asyncpg://${POSTGRES__USER}:${POSTGRES__PASSWORD}@postgres-api:5432/${POSTGRES__DB}
+      - SQLALCHEMY__URL=postgresql://${POSTGRES__USER}:${POSTGRES__PASSWORD}@postgres-api:5432/${POSTGRES__DB}
+    command: >
+      bash -c "python3 src/main.py"
+    depends_on:
+      - postgres-api
+
+  postgres-api:
+    container_name: postgres-api
+    image: postgres:13.3
+    env_file: .env
+    environment:
+      POSTGRES_DB: ${POSTGRES__DB}
+      POSTGRES_USER: ${POSTGRES__USER}
+      POSTGRES_PASSWORD: ${POSTGRES__PASSWORD}
